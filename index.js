@@ -20,27 +20,27 @@ const client = new MongoClient(uri, {
 const run = async () => {
     try {
         await client.connect()
-         const db = client.db("simpleCrud");
-         const userCollection = db.collection("users");
+        const db = client.db("simpleCrud");
+        const userCollection = db.collection("users");
 
-        app.get("/users", async(req, res)=>{
+        app.get("/users", async (req, res) => {
             const cursor = userCollection.find();
             const result = await cursor.toArray();
             res.send(result);
         })
 
-        app.get("/users/:id", async(req, res)=>{
+        app.get("/users/:id", async (req, res) => {
 
             const id = req.params.id
             const query = {
                 _id: new ObjectId(id)
             }
             const user = await userCollection.findOne(query);
-            console.log(id, "params id");
+            // console.log(id, "params id");
             res.send(user);
         })
 
-        app.delete("/users/:id", async(req, res)=>{
+        app.delete("/users/:id", async (req, res) => {
             const id = req.params.id;
             const query = {
                 _id: new ObjectId(id)
@@ -49,9 +49,27 @@ const run = async () => {
             res.send(user);
         })
 
-        app.post("/users", async(req, res)=>{
+        app.post("/users", async (req, res) => {
             const newUser = req.body
             const result = await userCollection.insertOne(newUser)
+            res.send(result);
+        })
+
+        app.patch('/users/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = {
+                _id: new ObjectId(id)
+            }
+            const modifiedUser = req.body
+            const updatedDocument ={
+                $set:{
+                    name: modifiedUser.name,
+                    email: modifiedUser.email,
+                    role: modifiedUser.role
+                }
+            }
+
+            const result = await userCollection.updateOne(filter, updatedDocument);
             res.send(result);
         })
 
